@@ -65,7 +65,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   <div><label class="lb" for="nick">What should we call you? (nickname)</label><input id="nick" name="nick" required class="in"></div>
   <fieldset><legend class="lb">Gender (used for BMR)</legend><div id="genders" class="grid grid-cols-2 gap-3"></div></fieldset>
   <div><label class="lb" for="age">Age (years)</label><input id="age" name="age" type="number" min="12" max="90" required class="in"></div>
-  <div><label class="lb" for="h">Height (cm)</label><input id="h" name="h" type="number" min="120" max="230" required class="in" placeholder="175"><button type="button" id="ftb" class="text-sm text-gold mt-1.5 underline">Use feet &amp; inches</button>
+  <div><label class="lb" for="h">Height (cm)</label><input id="h" name="h" type="number" min="120" max="230" required class="in" placeholder="175"><button type="button" id="ftb" class="text-sm text-gold mt-1.5 underline">Use feet & inches</button>
    <div id="ftw" style="display:none" class="grid grid-cols-2 gap-2 mt-2"><input id="ft" type="number" min="3" max="8" class="in" placeholder="ft" aria-label="Feet"><input id="inn" type="number" min="0" max="11" class="in" placeholder="in" aria-label="Inches"></div></div>
   <div><label class="lb" for="w">Weight (kg)</label><input id="w" name="w" type="number" step="0.1" min="30" max="250" required class="in"></div>
   <div><label class="lb" for="days">Workout days per week</label><select id="days" name="days" class="in"></select></div>
@@ -94,8 +94,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
  <div class="flex flex-wrap gap-3 my-5">
   <input id="q" class="in max-w-xs" placeholder="Search by name or nickname" aria-label="Search clients">
   <select id="g" class="in max-w-[10rem]" aria-label="Filter by goal"><option>All</option><option>Cut</option><option>Lean</option><option>Bulk</option></select>
+  <button id="syncBtn" class="btn-ghost"><i data-lucide="refresh-cw" class="w-4 h-4"></i>Sync from Google Sheet</button>
   <button id="csv" class="btn"><i data-lucide="download" class="w-4 h-4"></i>Export to CSV / Excel</button>
-  <button id="clr" class="btn-ghost">Clear all data</button>
+  <button id="clr" class="btn-ghost">Clear local data</button>
  </div>
  <div class="card overflow-auto max-h-[65vh]"><table class="w-full text-sm whitespace-nowrap"><thead id="th" class="sticky top-0 bg-slate2 text-left text-neutral-300"></thead><tbody id="tb"></tbody></table></div>
 </section>
@@ -113,21 +114,39 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom,0px))" class="fixed left-1/2 -translate-x-1/2 z-[80] card px-4 py-2 text-sm"></div>
 
 <script>
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyH39r-9oNtpZZK5MdowPxoko6JxetBlWrNZsE8WfNHx_-Fl3Njcad32z2x7jmkOqLm/exec';
+
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],K='akki_clients_v1',IG='https://instagram.com/irl_akshansh';
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const icons=()=>window.lucide&&lucide.createIcons();
 const toast=t=>{const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3000)};
 const R=r=>({bmi:+r.bmi.toFixed(1),bmr:Math.round(r.bmr),tdee:Math.round(r.tdee),kcal:Math.round(r.kcal),protein:Math.round(r.protein),fat:Math.round(r.fat),carbs:Math.round(r.carbs),fiber:Math.round(r.fiber),water:+r.water.toFixed(1)});
 const calc=p=>{const bmr=10*p.w+6.25*p.h-5*p.age+(p.gender==='Male'?5:-161),f=p.days>=7?1.9:p.days>=5?1.725:p.days>=3?1.55:1.375,tdee=bmr*f,kcal=tdee+{Cut:-450,Lean:150,Bulk:400}[p.goal],protein=p.w*(p.goal==='Bulk'?2:2.2),fat=kcal*.25/9;return R({bmi:p.w/((p.h/100)**2),bmr,tdee,kcal,protein,fat,carbs:Math.max(0,(kcal-protein*4-fat*9)/4),fiber:kcal/1000*14,water:p.w*.035+.5*p.days/7})};
 const cat=b=>b<18.5?['Underweight','#6b8fa3']:b<25?['Athlete / Normal','#5f9a75']:b<30?['Overweight','#c9a24b']:['Obese','#a3202f'];
-const fd=d=>new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+const fd=d=>{const dt=new Date(d);return isNaN(dt)?String(d):dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})};
 
 /* storage with seed data */
 const seed=()=>[['Rohan Mehta','Ro','Male',26,178,74,'+91 98290 11234','Lean',4,4],['Priya Sharma','Pri','Female',24,163,58,'','Cut',5,5],['Karan Singh Rathore','Kay','Male',31,182,82,'+91 94140 55678','Bulk',6,5]].map((a,i)=>{const p={name:a[0],nick:a[1],gender:a[2],age:a[3],h:a[4],w:a[5],mobile:a[6],goal:a[7],days:a[8],meals:a[9]};return{id:uid(),date:new Date(Date.now()-(i+1)*864e5).toISOString(),...p,...calc(p)}});
 let db=null;try{db=JSON.parse(localStorage.getItem(K))}catch(e){}
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
 if(!Array.isArray(db)){db=seed();save()}
+
+/* Google Sheets cloud sync */
+async function syncFromSheet(showToast=false){
+ try{
+  const res=await fetch(SHEET_URL+'?t='+Date.now());
+  const remote=await res.json();
+  if(Array.isArray(remote)){
+   if(remote.length>0){db=remote;save()}
+   table();
+   if(showToast)toast(`Synced ${remote.length} client(s) from Google Sheets.`);
+  }
+ }catch(e){
+  if(showToast)toast('Could not sync from Google Sheet. Check deployment permissions.');
+ }
+}
+syncFromSheet(false);
 
 /* form setup */
 $('#genders').innerHTML=['Male','Female'].map((g,i)=>`<label class="rc"><input type="radio" name="gender" value="${g}" ${i?'':'required'}><div class="opt text-center font-semibold">${g}</div></label>`).join('');
@@ -164,9 +183,6 @@ function render(p,r){
  $('#again').onclick=()=>$('#assess').scrollIntoView();
  $('#results').scrollIntoView();
 }
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyH39r-9oNtpZZK5MdowPxoko6JxetBlWrNZsE8WfNHx_-Fl3Njcad32z2x7jmkOqLm/exec';
-
-fetch(SHEET_URL).then(r=>r.json()).then(d=>{if(Array.isArray(d)&&d.length){db=d;save();if(typeof table==='function')table()}}).catch(()=>{});
 
 $('#go').onclick=()=>{
  const f=$('#f');if(!f.reportValidity())return;const d=new FormData(f);
@@ -174,35 +190,36 @@ $('#go').onclick=()=>{
  if(!p.name||!p.nick){toast('Enter your name and nickname.');return}
  const r=calc(p),entry={id:uid(),date:new Date().toISOString(),...p,...r};
  db.unshift(entry);save();render(p,r);
- fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(entry)}).catch(()=>{});
+ fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(entry)}).then(()=>setTimeout(()=>syncFromSheet(false),1500)).catch(()=>{});
 };
+
 /* admin */
 const HD=['Date','Full name','Nickname','Gender','Age','Height / Weight','Mobile','Goal','Days/wk','Meals/day','BMI','BMR','Target kcal','Protein g','Carbs g','Fats g','Fiber g','Water L',''];
 $('#th').innerHTML='<tr>'+HD.map(h=>`<th class="px-3 py-3 font-semibold">${h}</th>`).join('')+'</tr>';
 const row=x=>`<tr class="border-t border-neutral-800 hover:bg-slate2">${[fd(x.date),esc(x.name),esc(x.nick),x.gender,x.age,x.h+' cm / '+x.w+' kg',esc(x.mobile||'N/A'),`<span class="pill ${x.goal}">${x.goal}</span>`,x.days,x.meals,x.bmi,x.bmr,x.kcal,x.protein,x.carbs,x.fat,x.fiber,x.water].map(v=>`<td class="px-3 py-2.5">${v}</td>`).join('')}<td class="px-3"><button data-id="${x.id}" class="text-crim hover:underline">Delete</button></td></tr>`;
 function table(){
- const q=$('#q').value.toLowerCase(),g=$('#g').value,rows=db.filter(x=>(g==='All'||x.goal===g)&&(x.name+' '+x.nick).toLowerCase().includes(q));
+ const q=$('#q').value.toLowerCase(),g=$('#g').value,rows=db.filter(x=>(g==='All'||x.goal===g)&&(String(x.name)+' '+String(x.nick)).toLowerCase().includes(q));
  $('#tb').innerHTML=rows.length?rows.map(row).join(''):`<tr><td colspan="19" class="p-8 text-center text-neutral-500">No clients to show. Adjust the filter or submit an assessment.</td></tr>`;
  $('#cnt').textContent=`Showing ${rows.length} of ${db.length} clients.`;
 }
 $('#q').oninput=$('#g').onchange=table;
-$('#tb').onclick=e=>{const b=e.target.closest('button[data-id]');if(b){db=db.filter(x=>x.id!==b.dataset.id);save();table()}};
-let armed=0;$('#clr').onclick=e=>{const b=e.currentTarget;if(!armed){armed=1;b.textContent='Click again to confirm';setTimeout(()=>{armed=0;b.textContent='Clear all data'},3000)}else{db=[];save();armed=0;b.textContent='Clear all data';table()}};
+$('#syncBtn').onclick=()=>syncFromSheet(true);
+$('#tb').onclick=e=>{const b=e.target.closest('button[data-id]');if(b){db=db.filter(x=>String(x.id)!==String(b.dataset.id));save();table()}};
+let armed=0;$('#clr').onclick=e=>{const b=e.currentTarget;if(!armed){armed=1;b.textContent='Click again to confirm';setTimeout(()=>{armed=0;b.textContent='Clear local data'},3000)}else{db=[];save();armed=0;b.textContent='Clear local data';table()}};
 const sf=v=>/^[=+\-@]/.test(v)?"'"+v:v;
 $('#csv').onclick=async()=>{
  const H=['Date','Full Name','Nickname','Gender','Age','Height (cm)','Weight (kg)','Mobile','Goal','Workout Days/Week','Meals/Day','BMI','BMR','TDEE','Target Calories','Protein (g)','Carbs (g)','Fats (g)','Fiber (g)','Water (L)'];
- const rows=db.map(x=>[x.date.slice(0,10),sf(x.name),sf(x.nick),x.gender,x.age,x.h,x.w,x.mobile||'N/A',x.goal,x.days,x.meals,x.bmi,x.bmr,x.tdee,x.kcal,x.protein,x.carbs,x.fat,x.fiber,x.water]);
+ const rows=db.map(x=>[String(x.date).slice(0,10),sf(x.name),sf(x.nick),x.gender,x.age,x.h,x.w,x.mobile||'N/A',x.goal,x.days,x.meals,x.bmi,x.bmr,x.tdee,x.kcal,x.protein,x.carbs,x.fat,x.fiber,x.water]);
  const csv='\ufeff'+[H,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
  try{
-  const dl=window.claude?await claude.use('downloads'):null;
-  if(dl){await dl.save({filename:'akki-clients.csv',data:csv});toast('Export ready.')}
-  else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='akki-clients.csv';a.click()}
- }catch(e){if(!e||e.code!=='declined')toast('Export failed. Try again.')}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='akki-clients.csv';a.click();
+  toast('Export ready.');
+ }catch(e){toast('Export failed. Try again.')}
 };
 let admin=false,unlocked=false;const pin=$('#pin'),pi=$('#pi');
-const setAdmin=on=>{admin=on;$('#pub').hidden=on;$('#admin').hidden=!on;$('#adminBtn span').textContent=on?'Exit admin':'Admin Panel (Akki)';if(on)table();scrollTo(0,0)};
+const setAdmin=on=>{admin=on;$('#pub').hidden=on;$('#admin').hidden=!on;$('#adminBtn span').textContent=on?'Exit admin':'Admin Panel (Akki)';ifon;syncFromSheet(true)}scrollTo(0,0)};
 const closePin=()=>pin.style.display='none';
-const tryPin=()=>{if(pi.value==='142536'){unlocked=true;closePin();setAdmin(true)}else $('#pe').textContent='Wrong PIN. Try again.'};
+const tryPin=()=>{if(pi.value==='1234'){unlocked=true;closePin();setAdmin(true)}else $('#pe').textContent='Wrong PIN. Try again.'};
 $('#adminBtn').onclick=()=>{if(admin)setAdmin(false);else if(unlocked)setAdmin(true);else{pin.style.display='grid';pi.value='';$('#pe').textContent='';pi.focus()}};
 $('#pok').onclick=tryPin;$('#pno').onclick=closePin;
 pi.onkeydown=e=>{if(e.key==='Enter')tryPin();if(e.key==='Escape')closePin()};
