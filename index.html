@@ -164,13 +164,18 @@ function render(p,r){
  $('#again').onclick=()=>$('#assess').scrollIntoView();
  $('#results').scrollIntoView();
 }
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyH39r-9oNtpZZK5MdowPxoko6JxetBlWrNZsE8WfNHx_-Fl3Njcad32z2x7jmkOqLm/exec';
+
+fetch(SHEET_URL).then(r=>r.json()).then(d=>{if(Array.isArray(d)&&d.length){db=d;save();if(typeof table==='function')table()}}).catch(()=>{});
+
 $('#go').onclick=()=>{
  const f=$('#f');if(!f.reportValidity())return;const d=new FormData(f);
  const p={name:d.get('name').trim(),nick:d.get('nick').trim(),gender:d.get('gender'),age:+d.get('age'),h:+d.get('h'),w:+d.get('w'),days:+d.get('days'),meals:+d.get('meals'),goal:d.get('goal'),mobile:d.get('mobile').trim()};
  if(!p.name||!p.nick){toast('Enter your name and nickname.');return}
- const r=calc(p);db.unshift({id:uid(),date:new Date().toISOString(),...p,...r});save();render(p,r);
+ const r=calc(p),entry={id:uid(),date:new Date().toISOString(),...p,...r};
+ db.unshift(entry);save();render(p,r);
+ fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(entry)}).catch(()=>{});
 };
-
 /* admin */
 const HD=['Date','Full name','Nickname','Gender','Age','Height / Weight','Mobile','Goal','Days/wk','Meals/day','BMI','BMR','Target kcal','Protein g','Carbs g','Fats g','Fiber g','Water L',''];
 $('#th').innerHTML='<tr>'+HD.map(h=>`<th class="px-3 py-3 font-semibold">${h}</th>`).join('')+'</tr>';
