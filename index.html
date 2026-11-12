@@ -202,7 +202,7 @@ $('#csv').onclick=async()=>{
 let admin=false,unlocked=false;const pin=$('#pin'),pi=$('#pi');
 const setAdmin=on=>{admin=on;$('#pub').hidden=on;$('#admin').hidden=!on;$('#adminBtn span').textContent=on?'Exit admin':'Admin Panel (Akki)';if(on)table();scrollTo(0,0)};
 const closePin=()=>pin.style.display='none';
-const tryPin=()=>{if(pi.value==='1234'){unlocked=true;closePin();setAdmin(true)}else $('#pe').textContent='Wrong PIN. Try again.'};
+const tryPin=()=>{if(pi.value==='142536'){unlocked=true;closePin();setAdmin(true)}else $('#pe').textContent='Wrong PIN. Try again.'};
 $('#adminBtn').onclick=()=>{if(admin)setAdmin(false);else if(unlocked)setAdmin(true);else{pin.style.display='grid';pi.value='';$('#pe').textContent='';pi.focus()}};
 $('#pok').onclick=tryPin;$('#pno').onclick=closePin;
 pi.onkeydown=e=>{if(e.key==='Enter')tryPin();if(e.key==='Escape')closePin()};
