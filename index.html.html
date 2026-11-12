@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Akki’s Iron Lab — Fitness Assessment</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+<script>tailwind.config={theme:{extend:{colors:{ink:'#0a0a0a',coal:'#141414',slate2:'#1f1f1f',crim:'#a3202f',gold:'#c9a24b'},fontFamily:{d:['Barlow Condensed','Impact','sans-serif'],b:['Barlow','system-ui','sans-serif']}}}}</script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark;--ink:#0a0a0a;--coal:#141414;--slate:#1f1f1f;--text:#e8e4dc;--crim:#a3202f;--gold:#c9a24b}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px);scroll-behavior:smooth}
+body{background:var(--ink);color:var(--text)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--ink);z-index:60}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.card{background:var(--coal);border:1px solid #262626;border-radius:14px}
+.lift{transition:transform .25s,border-color .25s}.lift:hover{transform:translateY(-4px);border-color:var(--gold)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:var(--crim);color:#fff;font-weight:600;padding:.75rem 1.4rem;border-radius:10px;transition:transform .2s,background .2s}
+.btn:hover{background:#b8283a;transform:translateY(-2px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:.4rem;border:1px solid #3a3a3a;border-radius:10px;padding:.45rem .9rem;transition:border-color .2s,color .2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.in{width:100%;background:var(--slate);border:1px solid #2c2c2c;border-radius:10px;padding:.7rem .85rem;color:var(--text)}
+.lb{display:block;font-size:.875rem;color:#a8a49c;margin-bottom:.35rem}
+.rc{position:relative;display:block;cursor:pointer}
+.rc input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer}
+.opt{background:var(--slate);border:1px solid #2c2c2c;border-radius:12px;padding:.8rem 1rem;transition:all .2s}
+.rc:hover .opt{border-color:#555}.rc input:checked+.opt{border-color:var(--gold);background:#241f14}.rc input:focus-visible+.opt{outline:2px solid var(--gold);outline-offset:2px}
+.bar{height:8px;background:#262626;border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;border-radius:99px;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;font-weight:600;color:var(--gold);border:1px solid #4a3d1c;background:#1d1809;border-radius:99px;padding:.25rem .7rem;animation:fade 2.4s infinite}
+.pulse{animation:pl 2s infinite}
+.pill{padding:.15rem .6rem;border-radius:99px;font-size:.75rem;font-weight:600}
+.pill.Cut{background:#3a1218;color:#e58a96}.pill.Lean{background:#3a2f12;color:#e0c070}.pill.Bulk{background:#2a2a2a;color:#cfcfcf}
+@keyframes pl{0%,100%{box-shadow:0 0 0 0 rgba(163,32,47,.6)}50%{box-shadow:0 0 0 8px rgba(163,32,47,0)}}
+@keyframes fade{0%,100%{opacity:1}50%{opacity:.55}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="font-b antialiased">
+<header class="sticky z-40 bg-ink border-b border-neutral-800" style="top:env(safe-area-inset-top,0px)">
+ <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+  <a href="#top" class="font-d text-2xl font-extrabold tracking-wide flex items-center gap-2"><i data-lucide="dumbbell" class="text-gold"></i>Iron Lab</a>
+  <nav class="flex items-center gap-3 sm:gap-5 text-sm">
+   <a class="hidden md:inline hover:text-gold" href="#assess">Assessment</a>
+   <a class="hidden md:inline hover:text-gold" href="#soon">Coming soon</a>
+   <a href="https://instagram.com/irl_akshansh" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 hover:text-gold"><i data-lucide="instagram" class="w-4 h-4"></i>@irl_akshansh</a>
+   <button id="adminBtn" class="btn-ghost"><i data-lucide="shield" class="w-4 h-4"></i><span>Admin Panel (Akki)</span></button>
+  </nav>
+ </div>
+</header>
+
+<main id="pub">
+<section id="top" class="max-w-6xl mx-auto px-4 pt-16 pb-12 sm:pt-24">
+ <p class="text-gold font-semibold">Managed by Akshansh — you can call me Akki</p>
+ <h1 class="font-d font-extrabold text-6xl sm:text-8xl leading-[.95] mt-3 max-w-3xl">Know your numbers.<br>Then lift.</h1>
+ <p class="text-neutral-400 text-lg mt-5 max-w-xl">Answer a few quick questions and get your calories, macros, fiber, water and per-meal targets, worked out for your goal.</p>
+ <div class="mt-8 flex flex-wrap gap-3"><a href="#assess" class="btn">Start my assessment</a><a href="https://instagram.com/irl_akshansh" target="_blank" rel="noopener noreferrer" class="btn-ghost">Follow @irl_akshansh</a></div>
+</section>
+
+<section id="assess" class="max-w-6xl mx-auto px-4 py-10">
+ <h2 class="font-d text-4xl sm:text-5xl font-extrabold mb-6">Fitness assessment</h2>
+ <form id="f" onsubmit="return false" class="card p-5 sm:p-8 grid gap-5 sm:grid-cols-2">
+  <div><label class="lb" for="name">Full name</label><input id="name" name="name" required class="in" autocomplete="name"></div>
+  <div><label class="lb" for="nick">What should we call you? (nickname)</label><input id="nick" name="nick" required class="in"></div>
+  <fieldset><legend class="lb">Gender (used for BMR)</legend><div id="genders" class="grid grid-cols-2 gap-3"></div></fieldset>
+  <div><label class="lb" for="age">Age (years)</label><input id="age" name="age" type="number" min="12" max="90" required class="in"></div>
+  <div><label class="lb" for="h">Height (cm)</label><input id="h" name="h" type="number" min="120" max="230" required class="in" placeholder="175"><button type="button" id="ftb" class="text-sm text-gold mt-1.5 underline">Use feet &amp; inches</button>
+   <div id="ftw" style="display:none" class="grid grid-cols-2 gap-2 mt-2"><input id="ft" type="number" min="3" max="8" class="in" placeholder="ft" aria-label="Feet"><input id="inn" type="number" min="0" max="11" class="in" placeholder="in" aria-label="Inches"></div></div>
+  <div><label class="lb" for="w">Weight (kg)</label><input id="w" name="w" type="number" step="0.1" min="30" max="250" required class="in"></div>
+  <div><label class="lb" for="days">Workout days per week</label><select id="days" name="days" class="in"></select></div>
+  <div><label class="lb" for="meals">Meals per day</label><select id="meals" name="meals" class="in"></select></div>
+  <fieldset class="sm:col-span-2"><legend class="lb">Fitness goal</legend><div id="goals" class="grid sm:grid-cols-3 gap-3"></div></fieldset>
+  <div class="sm:col-span-2"><label class="lb" for="mobile">Mobile number (optional, for coaching follow-ups)</label><input id="mobile" name="mobile" type="tel" pattern="[+0-9 \-]{7,15}" class="in" placeholder="+91 98765 43210"></div>
+  <div class="sm:col-span-2"><button type="button" id="go" class="btn w-full sm:w-auto"><i data-lucide="zap" class="w-4 h-4"></i>Calculate my plan</button></div>
+ </form>
+</section>
+
+<section id="results" hidden><div id="res" class="max-w-6xl mx-auto px-4 py-12"></div></section>
+
+<section id="soon" class="max-w-6xl mx-auto px-4 py-16">
+ <h2 class="font-d text-4xl sm:text-5xl font-extrabold">In the works</h2>
+ <p class="text-neutral-400 mt-2">Two upgrades are under development.</p>
+ <div class="grid md:grid-cols-2 gap-5 mt-8">
+  <article class="card lift p-6"><span class="badge"><i data-lucide="lock" class="w-3.5 h-3.5"></i>Under development: coming soon</span><h3 class="font-d text-3xl font-bold mt-4">Custom workout split builder</h3><p class="text-neutral-400 mt-2">Get a tailored Push/Pull/Legs, Upper/Lower, or Bro Split customized to your recovery and schedule.</p></article>
+  <article class="card lift p-6"><span class="badge"><i data-lucide="lock" class="w-3.5 h-3.5"></i>Under development: coming soon</span><h3 class="font-d text-3xl font-bold mt-4">1-on-1 personal coaching with Akki</h3><p class="text-neutral-400 mt-2">Direct mentorship, weekly check-ins, and custom diet adjustments with Akshansh.</p><a href="https://instagram.com/irl_akshansh" target="_blank" rel="noopener noreferrer" class="btn mt-5"><i data-lucide="instagram" class="w-4 h-4"></i>DM @irl_akshansh for Early Access</a></article>
+ </div>
+</section>
+</main>
+
+<section id="admin" hidden class="max-w-[1400px] mx-auto px-4 py-10">
+ <h2 class="font-d text-4xl sm:text-5xl font-extrabold">Client submissions</h2>
+ <p class="text-neutral-400 mt-1">Signed in as Akki. <span id="cnt"></span></p>
+ <div class="flex flex-wrap gap-3 my-5">
+  <input id="q" class="in max-w-xs" placeholder="Search by name or nickname" aria-label="Search clients">
+  <select id="g" class="in max-w-[10rem]" aria-label="Filter by goal"><option>All</option><option>Cut</option><option>Lean</option><option>Bulk</option></select>
+  <button id="csv" class="btn"><i data-lucide="download" class="w-4 h-4"></i>Export to CSV / Excel</button>
+  <button id="clr" class="btn-ghost">Clear all data</button>
+ </div>
+ <div class="card overflow-auto max-h-[65vh]"><table class="w-full text-sm whitespace-nowrap"><thead id="th" class="sticky top-0 bg-slate2 text-left text-neutral-300"></thead><tbody id="tb"></tbody></table></div>
+</section>
+
+<footer class="border-t border-neutral-800 mt-8"><div class="max-w-6xl mx-auto px-4 py-8 flex flex-wrap justify-between gap-3 text-sm text-neutral-400"><p>Managed by Akshansh (Akki). Estimates only; not medical advice.</p><a href="https://instagram.com/irl_akshansh" target="_blank" rel="noopener noreferrer" class="hover:text-gold flex items-center gap-1"><i data-lucide="instagram" class="w-4 h-4"></i>@irl_akshansh</a></div></footer>
+
+<div id="pin" style="display:none" class="fixed inset-0 z-[70] bg-black/80 place-items-center p-4">
+ <div class="card p-6 w-full max-w-sm" role="dialog" aria-label="Admin access">
+  <h3 class="font-d text-3xl font-bold">Admin access</h3>
+  <label class="lb mt-3" for="pi">Enter your PIN</label><input id="pi" type="password" inputmode="numeric" class="in" autocomplete="off">
+  <p id="pe" class="text-sm text-crim mt-2 min-h-[1.25rem]" role="alert"></p>
+  <div class="flex gap-3 mt-3"><button id="pok" class="btn">Unlock</button><button id="pno" class="btn-ghost">Cancel</button></div>
+ </div>
+</div>
+<div id="toast" role="status" style="display:none;bottom:calc(1rem + env(safe-area-inset-bottom,0px))" class="fixed left-1/2 -translate-x-1/2 z-[80] card px-4 py-2 text-sm"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],K='akki_clients_v1',IG='https://instagram.com/irl_akshansh';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const icons=()=>window.lucide&&lucide.createIcons();
+const toast=t=>{const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3000)};
+const R=r=>({bmi:+r.bmi.toFixed(1),bmr:Math.round(r.bmr),tdee:Math.round(r.tdee),kcal:Math.round(r.kcal),protein:Math.round(r.protein),fat:Math.round(r.fat),carbs:Math.round(r.carbs),fiber:Math.round(r.fiber),water:+r.water.toFixed(1)});
+const calc=p=>{const bmr=10*p.w+6.25*p.h-5*p.age+(p.gender==='Male'?5:-161),f=p.days>=7?1.9:p.days>=5?1.725:p.days>=3?1.55:1.375,tdee=bmr*f,kcal=tdee+{Cut:-450,Lean:150,Bulk:400}[p.goal],protein=p.w*(p.goal==='Bulk'?2:2.2),fat=kcal*.25/9;return R({bmi:p.w/((p.h/100)**2),bmr,tdee,kcal,protein,fat,carbs:Math.max(0,(kcal-protein*4-fat*9)/4),fiber:kcal/1000*14,water:p.w*.035+.5*p.days/7})};
+const cat=b=>b<18.5?['Underweight','#6b8fa3']:b<25?['Athlete / Normal','#5f9a75']:b<30?['Overweight','#c9a24b']:['Obese','#a3202f'];
+const fd=d=>new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+/* storage with seed data */
+const seed=()=>[['Rohan Mehta','Ro','Male',26,178,74,'+91 98290 11234','Lean',4,4],['Priya Sharma','Pri','Female',24,163,58,'','Cut',5,5],['Karan Singh Rathore','Kay','Male',31,182,82,'+91 94140 55678','Bulk',6,5]].map((a,i)=>{const p={name:a[0],nick:a[1],gender:a[2],age:a[3],h:a[4],w:a[5],mobile:a[6],goal:a[7],days:a[8],meals:a[9]};return{id:uid(),date:new Date(Date.now()-(i+1)*864e5).toISOString(),...p,...calc(p)}});
+let db=null;try{db=JSON.parse(localStorage.getItem(K))}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
+if(!Array.isArray(db)){db=seed();save()}
+
+/* form setup */
+$('#genders').innerHTML=['Male','Female'].map((g,i)=>`<label class="rc"><input type="radio" name="gender" value="${g}" ${i?'':'required'}><div class="opt text-center font-semibold">${g}</div></label>`).join('');
+$('#goals').innerHTML=[['Cut','flame','Fat loss & shredding'],['Lean','activity','Recomposition & lean muscle gain'],['Bulk','dumbbell','Maximum muscle & strength']].map((g,i)=>`<label class="rc"><input type="radio" name="goal" value="${g[0]}" ${i?'':'required'}><div class="opt h-full"><i data-lucide="${g[1]}" class="text-gold"></i><p class="font-d text-2xl font-bold mt-2">${g[0]}</p><p class="text-sm text-neutral-400">${g[2]}</p></div></label>`).join('');
+$('#days').innerHTML=[1,2,3,4,5,6,7].map(n=>`<option ${n===4?'selected':''} value="${n}">${n} day${n>1?'s':''}</option>`).join('');
+$('#meals').innerHTML=[2,3,4,5,6].map(n=>`<option ${n===4?'selected':''} value="${n}">${n} meals</option>`).join('');
+$('#ftb').onclick=()=>{const w=$('#ftw');w.style.display=w.style.display==='none'?'grid':'none'};
+['#ft','#inn'].forEach(s=>$(s).oninput=()=>{if($('#ft').value)$('#h').value=Math.round((+$('#ft').value*12+(+$('#inn').value||0))*2.54)});
+
+/* results */
+const count=el=>{const t=+el.dataset.c,d=+el.dataset.d||0,s=performance.now(),f=n=>{const p=Math.min(1,(n-s)/1100);el.textContent=(t*(1-(1-p)**3)).toFixed(d);if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)};
+function render(p,r){
+ const [cn,cc]=cat(r.bmi),m=p.meals,pos=Math.min(100,Math.max(0,(r.bmi-15)/25*100)),pc=r.protein*4/r.kcal*100,fc=r.fat*9/r.kcal*100,cb=r.carbs*4/r.kcal*100;
+ const gl={Cut:'Fat loss & shredding',Lean:'Recomposition & lean muscle',Bulk:'Maximum muscle & strength'}[p.goal];
+ const tile=(l,v,u)=>`<div class="card lift p-4"><p class="text-sm text-neutral-400">${l}</p><p class="font-d text-4xl font-bold mt-1"><b data-c="${v}">0</b> <span class="text-base font-b font-medium text-neutral-500">${u}</span></p></div>`;
+ const mac=(l,g,pct,col)=>`<div><div class="flex justify-between text-sm mb-1.5"><span>${l}</span><span><b data-c="${g}">0</b> g, ${Math.round(pct)}% of calories</span></div><div class="bar"><i data-w="${pct}" style="background:${col}"></i></div></div>`;
+ $('#res').innerHTML=`
+ <div class="flex flex-wrap items-end justify-between gap-4 mb-8"><div><p class="text-gold font-semibold flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-crim pulse"></span>${p.goal} plan: ${gl}</p><h2 class="font-d text-5xl sm:text-7xl font-extrabold mt-1">Let’s get to work, ${esc(p.nick)}.</h2></div><button id="again" class="btn-ghost">Recalculate</button></div>
+ <div class="grid lg:grid-cols-3 gap-4">
+  <div class="card lift p-5"><p class="text-sm text-neutral-400">Body mass index</p><p class="font-d text-6xl font-bold"><b data-c="${r.bmi}" data-d="1">0</b></p><span class="badge" style="color:${cc};border-color:${cc}">${cn}</span>
+   <div class="relative mt-6 h-2 rounded-full" style="background:linear-gradient(90deg,#6b8fa3 14%,#5f9a75 14% 40%,#c9a24b 40% 60%,#a3202f 60%)"><i data-l="${pos}" class="absolute -top-1.5 w-1.5 h-5 bg-white rounded" style="left:0;transition:left 1.1s cubic-bezier(.2,.8,.2,1)"></i></div>
+   <div class="flex justify-between text-xs text-neutral-500 mt-2"><span>15</span><span>18.5</span><span>25</span><span>30</span><span>40</span></div></div>
+  <div class="lg:col-span-2 grid sm:grid-cols-3 gap-4">${tile('BMR',r.bmr,'kcal')}${tile('Maintenance (TDEE)',r.tdee,'kcal')}${tile('Target for '+p.goal,r.kcal,'kcal')}</div>
+ </div>
+ <div class="card p-6 mt-4"><h3 class="font-d text-3xl font-bold mb-5">Daily macros and fiber</h3><div class="grid gap-5">${mac('Protein',r.protein,pc,'#a3202f')}${mac('Carbohydrates',r.carbs,cb,'#c9a24b')}${mac('Fats',r.fat,fc,'#8a8a8a')}</div><p class="text-sm text-neutral-400 mt-5">Fiber target: <b class="text-gold" data-c="${r.fiber}">0</b> g per day</p></div>
+ <div class="grid lg:grid-cols-3 gap-4 mt-4">
+  <div class="card p-6 lg:col-span-2"><h3 class="font-d text-3xl font-bold">Per meal, across ${m} meals</h3><div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">${[['Calories',r.kcal/m,'kcal'],['Protein',r.protein/m,'g'],['Carbs',r.carbs/m,'g'],['Fats',r.fat/m,'g']].map(a=>`<div class="bg-slate2 rounded-xl p-3"><p class="text-xs text-neutral-400">${a[0]}</p><p class="font-d text-3xl font-bold"><b data-c="${a[1]}">0</b> <span class="text-sm font-b text-neutral-500">${a[2]}</span></p></div>`).join('')}</div></div>
+  <div class="card lift p-6"><h3 class="font-d text-3xl font-bold">Daily water</h3><p class="font-d text-5xl font-bold mt-2"><b data-c="${r.water}" data-d="1">0</b> <span class="text-lg font-b text-neutral-500">L</span></p><p class="text-sm text-neutral-400 mt-1">About ${Math.round(r.water/.25)} glasses of 250 ml</p></div>
+ </div>
+ <div class="card p-6 mt-4 flex flex-wrap items-center justify-between gap-4"><p class="max-w-xl">Want a coach to fine-tune this? Message Akki on Instagram.</p><a href="${IG}" target="_blank" rel="noopener noreferrer" class="btn"><i data-lucide="instagram" class="w-4 h-4"></i>@irl_akshansh</a></div>`;
+ $('#results').hidden=false;icons();
+ $$('#res [data-c]').forEach(count);
+ setTimeout(()=>{$$('#res [data-w]').forEach(e=>e.style.width=e.dataset.w+'%');$$('#res [data-l]').forEach(e=>e.style.left=e.dataset.l+'%')},60);
+ $('#again').onclick=()=>$('#assess').scrollIntoView();
+ $('#results').scrollIntoView();
+}
+$('#go').onclick=()=>{
+ const f=$('#f');if(!f.reportValidity())return;const d=new FormData(f);
+ const p={name:d.get('name').trim(),nick:d.get('nick').trim(),gender:d.get('gender'),age:+d.get('age'),h:+d.get('h'),w:+d.get('w'),days:+d.get('days'),meals:+d.get('meals'),goal:d.get('goal'),mobile:d.get('mobile').trim()};
+ if(!p.name||!p.nick){toast('Enter your name and nickname.');return}
+ const r=calc(p);db.unshift({id:uid(),date:new Date().toISOString(),...p,...r});save();render(p,r);
+};
+
+/* admin */
+const HD=['Date','Full name','Nickname','Gender','Age','Height / Weight','Mobile','Goal','Days/wk','Meals/day','BMI','BMR','Target kcal','Protein g','Carbs g','Fats g','Fiber g','Water L',''];
+$('#th').innerHTML='<tr>'+HD.map(h=>`<th class="px-3 py-3 font-semibold">${h}</th>`).join('')+'</tr>';
+const row=x=>`<tr class="border-t border-neutral-800 hover:bg-slate2">${[fd(x.date),esc(x.name),esc(x.nick),x.gender,x.age,x.h+' cm / '+x.w+' kg',esc(x.mobile||'N/A'),`<span class="pill ${x.goal}">${x.goal}</span>`,x.days,x.meals,x.bmi,x.bmr,x.kcal,x.protein,x.carbs,x.fat,x.fiber,x.water].map(v=>`<td class="px-3 py-2.5">${v}</td>`).join('')}<td class="px-3"><button data-id="${x.id}" class="text-crim hover:underline">Delete</button></td></tr>`;
+function table(){
+ const q=$('#q').value.toLowerCase(),g=$('#g').value,rows=db.filter(x=>(g==='All'||x.goal===g)&&(x.name+' '+x.nick).toLowerCase().includes(q));
+ $('#tb').innerHTML=rows.length?rows.map(row).join(''):`<tr><td colspan="19" class="p-8 text-center text-neutral-500">No clients to show. Adjust the filter or submit an assessment.</td></tr>`;
+ $('#cnt').textContent=`Showing ${rows.length} of ${db.length} clients.`;
+}
+$('#q').oninput=$('#g').onchange=table;
+$('#tb').onclick=e=>{const b=e.target.closest('button[data-id]');if(b){db=db.filter(x=>x.id!==b.dataset.id);save();table()}};
+let armed=0;$('#clr').onclick=e=>{const b=e.currentTarget;if(!armed){armed=1;b.textContent='Click again to confirm';setTimeout(()=>{armed=0;b.textContent='Clear all data'},3000)}else{db=[];save();armed=0;b.textContent='Clear all data';table()}};
+const sf=v=>/^[=+\-@]/.test(v)?"'"+v:v;
+$('#csv').onclick=async()=>{
+ const H=['Date','Full Name','Nickname','Gender','Age','Height (cm)','Weight (kg)','Mobile','Goal','Workout Days/Week','Meals/Day','BMI','BMR','TDEE','Target Calories','Protein (g)','Carbs (g)','Fats (g)','Fiber (g)','Water (L)'];
+ const rows=db.map(x=>[x.date.slice(0,10),sf(x.name),sf(x.nick),x.gender,x.age,x.h,x.w,x.mobile||'N/A',x.goal,x.days,x.meals,x.bmi,x.bmr,x.tdee,x.kcal,x.protein,x.carbs,x.fat,x.fiber,x.water]);
+ const csv='\ufeff'+[H,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ try{
+  const dl=window.claude?await claude.use('downloads'):null;
+  if(dl){await dl.save({filename:'akki-clients.csv',data:csv});toast('Export ready.')}
+  else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='akki-clients.csv';a.click()}
+ }catch(e){if(!e||e.code!=='declined')toast('Export failed. Try again.')}
+};
+let admin=false,unlocked=false;const pin=$('#pin'),pi=$('#pi');
+const setAdmin=on=>{admin=on;$('#pub').hidden=on;$('#admin').hidden=!on;$('#adminBtn span').textContent=on?'Exit admin':'Admin Panel (Akki)';if(on)table();scrollTo(0,0)};
+const closePin=()=>pin.style.display='none';
+const tryPin=()=>{if(pi.value==='1234'){unlocked=true;closePin();setAdmin(true)}else $('#pe').textContent='Wrong PIN. Try again.'};
+$('#adminBtn').onclick=()=>{if(admin)setAdmin(false);else if(unlocked)setAdmin(true);else{pin.style.display='grid';pi.value='';$('#pe').textContent='';pi.focus()}};
+$('#pok').onclick=tryPin;$('#pno').onclick=closePin;
+pi.onkeydown=e=>{if(e.key==='Enter')tryPin();if(e.key==='Escape')closePin()};
+icons();
+</script>
+</body>
+</html>
